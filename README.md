@@ -4,7 +4,8 @@
 ![Generic badge](https://img.shields.io/badge/Made%20with-Jupyter-orange?style=for-the-badge&logo=Jupyter)
 ![Generic badge](https://img.shields.io/badge/Python3.0-<COLOR>.svg)
 
-This repository is for high-resolution atmospheric column water vapor (CWV) retrieval based on Inteferograms SAR data (InSAR)
+This repository is for high-resolution atmospheric column water vapor (CWV) retrieval based on Inteferograms SAR data (InSAR).
+
 Microwaves-based satellites have difficulties in detecting vapor field over lands, due to surface properties.
 Fortunately, interferograms of SAR, used to detecting surface displacements (e.g., earthquakes and volcanic activities), provide an unprecedented oppertunity to measure the vapor field with super fine resolutions (~few meters).
 
