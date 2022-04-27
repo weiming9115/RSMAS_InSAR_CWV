@@ -11,7 +11,7 @@ Fortunately, interferograms of SAR, used to detecting surface displacements (e.g
 The delay signal affected by atmospheric components relfects the zenith total delay (dry delay + wet delay due to vapor, ZWD) between two acquisition times. Such signal over the targeted swath is provided by interferometric images and absolute values of ZWD at imagery pixels are then retrived with the help of GPS stations (our ground truth for on-site ZTD, ZWD and CWV).
 
 <div align="center">
-<img src="/doc/InSAR_GPS_views.png" width="400" height="450" img> 
+<img src="/doc/InSAR_GPS_views.png" width="350" height="400" img> 
 </div>
   
   
