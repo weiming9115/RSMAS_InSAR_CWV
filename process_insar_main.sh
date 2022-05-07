@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CASE_ID=SouthWesternNAMChunk35SenAT64
+CASE_ID=SouthWesternNAMChunk32SenAT20
 echo "CASE_ID: " $CASE_ID
 echo "InSAR-PW processing"
 

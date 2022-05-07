@@ -51,10 +51,15 @@ shadowMask = geo_info['shadowMask']
 date_ifgrams = ifgrams['date']
 height =  geo_info['height']
 
+os.chdir('/data2/willytsai/InSAR_HRRR/auto_framework/'+CASE_ID+'/HRRR_data/sfc/regrid_3km/')
+files = sorted(glob('*grib2'))
+hourUTC = files[0][15:17] # file UTC, e.g., 01,03
+print('startUTC: ', hourUTC)
+
 # generate time index
 date = []
 for t in date_ifgrams:
-    date_full = t.decode("utf-8")+'02'
+    date_full = t.decode("utf-8")+hourUTC
     date.append(datetime.strptime(date_full,'%Y%m%d%H'))
 
 # flipping disp for ascending lat

@@ -330,7 +330,7 @@ plt.text(10,30,'R_value:'+str(round(r_stats.rvalue,3)),fontsize=14)
 plt.grid(linestyle=':',linewidth=0.5)
 plt.ylabel('COSMIC ZTD [mm]');plt.xlabel('InSAR ZTD [mm]')
 plt.legend()
-fig.savefig(OUTDIR+'ZTD_addoffset_scatterplot.pdf',dpi=200,
+fig.savefig(OUTDIR+'ZTD_addoffset_scatterplot.png',dpi=600,
            bbox_inches='tight',facecolor='white', transparent=False)
 plt.close()
 
@@ -506,7 +506,7 @@ for i,stat in enumerate(station_avail):
     ax[nrow[i],ncol[i]].spines['top'].set_visible(False)
 
 plt.tight_layout()
-fig.savefig(OUTDIR+'ZWD_diff_timeseries.pdf',dpi=200,
+fig.savefig(OUTDIR+'ZWD_diff_timeseries.png',dpi=600,
            bbox_inches='tight',facecolor='white', transparent=False)
 
 #=============================================
@@ -546,7 +546,7 @@ ax.text(20,25,'R_value:'+str(round(r_stats.rvalue,3)),fontsize=14)
 ax.grid(linestyle=':',linewidth=0.5)
 ax.set_ylabel('COSMIC PWV [mm]',fontsize=14);ax.set_xlabel('InSAR PWV [mm]',fontsize=14)
 ax.legend()
-fig.savefig(OUTDIR+'InSAR_GPS_PWV_scatterplot.pdf',dpi=200,
+fig.savefig(OUTDIR+'InSAR_GPS_PWV_scatterplot.png',dpi=600,
           bbox_inches='tight',facecolor='white', transparent=False)
 plt.close()
 
@@ -585,7 +585,7 @@ ax.text(20,25,'R_value:'+str(round(r_stats.rvalue,3)),fontsize=14)
 ax.grid(linestyle=':',linewidth=0.5)
 ax.set_ylabel('COSMIC PWV [mm]',fontsize=14);ax.set_xlabel('HRRR PWV [mm]',fontsize=14)
 plt.legend()
-fig.savefig(OUTDIR+'HRRR_GPS_PWV_scatterplot.pdf',dpi=200,
+fig.savefig(OUTDIR+'HRRR_GPS_PWV_scatterplot.png',dpi=600,
           bbox_inches='tight',facecolor='white', transparent=False)
 
 #=========================================

@@ -48,7 +48,7 @@ os.chdir('/data2/willytsai/InSAR_HRRR/auto_framework/'+CASE_ID+'/HRRR_data/sfc/r
 files = sorted(glob('*grib2'))
 # merge HRRR dataset
 # get one example file to have the size of a single ifgram image
-tmp = xr.open_dataset(files[-1],engine='cfgrib',
+tmp = xr.open_dataset(files[-2],engine='cfgrib',
                             backend_kwargs=dict(filter_by_keys={'stepType': 'instant','typeOfLevel':'unknown'}))
 pwat_tmp = tmp.pwat.sel(latitude=slice(axis_bound[0],axis_bound[1]),longitude=slice(axis_bound[2]+360,axis_bound[3]+360))
 
@@ -56,9 +56,11 @@ pwat_acqu = np.zeros((len(date_acqui),pwat_tmp.shape[0],pwat_tmp.shape[1])) # cr
 ps_acqu = np.copy(pwat_acqu)
 date_record = [] # save date_acqui as datetime for xarray
 
+hourUTC = files[0][15:17] # file UTC, e.g., 01,03
+
 with open("/data2/willytsai/InSAR_HRRR/auto_framework/"+CASE_ID+"/HRRR_log.txt",'w') as f:
     for t,date_str in enumerate(date_acqui):
-        matched_fid = 'hrrr.'+date_str+'.t02z.regrid3km.grib2'  # hrrr.20160714.t02z.regrid3km.grib2
+        matched_fid = 'hrrr.'+date_str+'.t'+hourUTC+'z.regrid3km.grib2'  # hrrr.20160714.t02z.regrid3km.grib2
         file_exist = np.size(np.intersect1d(np.array(files),matched_fid))>0 # return True or False
         date_record.append(datetime.strptime(matched_fid[5:18],'%Y%m%d.t%Hz'))
 
