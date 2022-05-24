@@ -37,6 +37,7 @@ os.chdir('/data2/willytsai/InSAR_HRRR/auto_framework/'+case_id+'/HRRR_data/sfc/'
 ## get close UTC of Sentinel-1
 s1_file = glob('/data2/willytsai/InSAR_HRRR/'+case_id+'/mintpy/*.he5')[0]
 s1_he5 = h5py.File(s1_file,'r')
+print('satellite time: ',(s1_he5.attrs['startUTC'])
 hh = s1_he5.attrs['startUTC'][11:13] # hr 
 mm = s1_he5.attrs['startUTC'][14:16] # mm
 if int(mm) > 30:

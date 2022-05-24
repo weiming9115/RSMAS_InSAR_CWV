@@ -184,21 +184,6 @@ def view_ZTDdiff_relocate(tot_delay_sub_insar, tot_delay_sub, station_id_subdoma
         plt.legend()
     return fig
 
-def plot_ZTDoffset_series(offset_best):
-    ''' plot the best ZTD offset blended by GPS and HRRR. Sometimes GPS is not valid, so we use HRRR 
-        as substitution at the new reference point. This allows to maximize the value of InSAR data we collect...'''
-
-    fig = plt.figure(figsize=(10,3))
-    plt.plot(offset,'ob')
-    plt.plot(offset_byhrrr,'-k')
-    plt.plot(offset_best,'-r')
-    plt.title('Valid GPS Records: '+str(valid_record)+' out of '
-          + str(len(tot_delay_sub_insar[ref_statID])),fontsize=14,loc='right')
-    plt.legend(['offset-GPS','offset-HRRR','offset-best'],frameon=False)
-    plt.ylabel('ZTD offset at REF [mm]',fontsize=12)
-    plt.grid(linestyle=':',linewidth=0.5)     
-    return fig
-
 #=============== END FUNCTIONS ===============
 
 #======================================================
@@ -303,75 +288,12 @@ print('OUTFILE: InSAR_ZTDdiff_relocate.png')
 #  some swathes with ref point over sea... or no GPS nearby
 # =========================================================
 
-# the reference point on InSAR map 
-S1_file = glob('/data2/willytsai/InSAR_HRRR/'+CASE_ID+'/mintpy/S1_*.he5')[0]
-data_ifgrams = h5py.File(S1_file, 'r')
-geo_info = data_ifgrams['HDFEOS']['GRIDS']['timeseries']['geometry']
-lon_ifgrams = geo_info['longitude']
-lat_ifgrams = geo_info['latitude']
-
-lon_sar = np.linspace(axis_bound[2],axis_bound[3],lon_ifgrams.shape[1])
-lat_sar = np.linspace(axis_bound[0],axis_bound[1],lon_ifgrams.shape[0])
-
-# creating total_delay_hrrr to replace GPS if needed... try to fully used our InSAR images
-data = xr.open_dataset('/data2/willytsai/InSAR_HRRR/auto_framework/'+CASE_ID+'/HRRR_regrid3km_ps.nc')
-ps_acqu = data.sp
-ps_diff = ps_acqu-ps_acqu.sel(time=datetime_ref)
-hydro_factor = 1e-6*0.776*287.15/9.8 # [m/pa]
-sar_ps_diff = np.zeros((len(date_list),len(lat_sar),len(lon_sar)))
-
-for t in range(sar_ps_diff.shape[0]):
-    sar_ps_diff[t,:,:] = remap_hrrr2SAR(ps_diff[t,:,:]) # regrid pressure diff into sar grid
-
-sar_dry_delay = hydro_factor*sar_ps_diff #[m/pa]*[pa]
-sar_dry_delay = xr.DataArray(sar_dry_delay,dims=('time','latitude','longitude')
-                            ,coords=(date_list,lat_sar,lon_sar),name='dry_delay')
-sar_dry_delay = sar_dry_delay.to_dataset(name='dry_delay')
-
-# wet delay
-data = xr.open_dataset('/data2/willytsai/InSAR_HRRR/auto_framework/'+CASE_ID+'/HRRR_regrid3km_pwat.nc')
-pwat_acqu = data.pwat
-pwat_diff = pwat_acqu-pwat_acqu.sel(time=datetime_ref)
-sar_pwat_diff = np.zeros((len(date_list),len(lat_sar),len(lon_sar)))
-
-for t in range(sar_pwat_diff.shape[0]):
-    sar_pwat_diff[t,:,:] = remap_hrrr2SAR(pwat_diff[t,:,:]) # regrid pressure diff into sar grid
-
-sar_wet_delay = 6.5*sar_pwat_diff #[m/pa]*[pa]
-sar_wet_delay = xr.DataArray(sar_wet_delay,dims=('time','latitude','longitude')
-                            ,coords=(date_list,lat_sar,lon_sar),name='dry_delay')
-sar_wet_delay = sar_wet_delay.to_dataset(name='dry_delay')
-
-tot_delay_acqu = wet_delay_acqu + dry_delay_acqu
 tot_delay_GPS = tot_delay_acqu[ref_statID] # GSP total delay at the reference point
-# extract tot_delay at the new reference point from HRRR
-tot_delay_hrrr = sar_dry_delay + sar_wet_delay
-tot_delay_hrrr = tot_delay_hrrr.sel(longitude=lon_refnew,latitude=lat_refnew,method='nearest').dry_delay
-
-
-
 dry_delay_sub = dry_delay_acqu[station_id_subdomain.index]
 dry_delay_GPS = dry_delay_acqu[ref_statID] # GSP dry delay at the reference point
 
-######### remove offset according to GPS/HRRR (close to the reference point) ############
-offset = (tot_delay_GPS-tot_delay_sub.loc[datetime_ref][ref_statID]) - tot_delay_sub_insar[ref_statID]*10*100 # [mm
-### if there's no GPS signals (nearly half of time)
-offset_byhrrr = (tot_delay_hrrr-tot_delay_hrrr.sel(time=datetime_ref)).values - tot_delay_sub_insar[ref_statID].values*10*100
-offset_byhrrr = pd.Series(offset_byhrrr, index=offset.index, name=offset.name)
-
-valid_record = len(np.where(offset.values>0)[0])
-offset_best = np.empty(len(offset))
-for n,val in enumerate(offset):
-    if np.isnan(val) == 1:
-        offset_best[n] = offset_byhrrr[n] 
-    else:
-        offset_best[n] = offset[n]
-offset_best = pd.Series(offset_best, index=offset.index, name=offset.name)
-
-fig = plot_ZTDoffset_series(offset_best)
-fig.savefig(OUTDIR+'InSAR_ZTDoffset_best.png',dpi=600,bbox_inches='tight',transparent=False)
-print('OUTFILE: InSAR_ZTDoffset_best.png') 
-### note: in this way, the ZTD of InSAR should be identical to GPS or HRRR (if GPS not valid) #####
+# remove offset according to GPS (close to the reference point)
+offset = (tot_delay_GPS-tot_delay_sub.loc[datetime_ref][ref_statID]) - tot_delay_sub_insar[ref_statID]*10*100 # [mm]
 
 # plotting corrected ZTD 
 fig = plt.figure(figsize=(5,5))
@@ -379,7 +301,7 @@ insar_rec = []; gps_rec = []
 
 for i in station_id_subdomain.index.values[:]:
     tmp = tot_delay_sub_insar[i]*100*10 # insar total delay diff [mm]
-    tmp2 = tot_delay_sub[i]-tot_delay_sub.loc[datetime_ref][i]-offset_best # COSMIC total delay diff
+    tmp2 = tot_delay_sub[i]-tot_delay_sub.loc[datetime_ref][i]-offset # COSMIC total delay diff
         
     insar_rec.append(tmp.values)
     gps_rec.append(tmp2.values)
@@ -428,7 +350,7 @@ lat_sar = np.linspace(axis_bound[0],axis_bound[1],lon_ifgrams.shape[0])
 
 # generate the 3-D dry delay field from HRRR surface pressure outputs
 data = xr.open_dataset('/data2/willytsai/InSAR_HRRR/auto_framework/'+CASE_ID+'/HRRR_regrid3km_ps.nc')
-ps_acqu = data.sp
+ps_acqu = data.pressure
 ps_diff = ps_acqu-ps_acqu.sel(time=datetime_ref)
 hydro_factor = 1e-6*0.776*287.15/9.8 # [m/pa]
 sar_ps_diff = np.zeros((len(date_list),len(lat_sar),len(lon_sar)))
@@ -502,25 +424,10 @@ for i in station_id_subdomain.index.values:
     sar_dry_delay_sub = pd.concat([sar_dry_delay_sub,tmp],axis=1)    
 offset_dry = (dry_delay_GPS-dry_delay_sub.loc[datetime_ref][ref_statID]) - sar_dry_delay_sub[ref_statID]*10*100
 
-######
-sar_dry_delay = sar_dry_delay.sel(longitude=lon_refnew,latitude=lat_refnew,method='nearest').dry_delay
-offset_dry_byhrrr = (sar_dry_delay-sar_dry_delay.sel(time=datetime_ref)).values -  sar_dry_delay_sub[ref_statID].values*10*100
-offset_dry_byhrrr = pd.Series(offset_dry_byhrrr, index=offset_dry.index, name=offset_dry.name)
-
-###### offset_dry best - replacing missing GPS by HRRR #####
-offset_dry_best = np.empty(len(offset_dry))
-for n,val in enumerate(offset_dry):
-    if np.isnan(val) == 1:
-        offset_dry_best[n] = offset_dry_byhrrr[n] 
-    else:
-        offset_dry_best[n] = offset_dry[n]
-offset_dry_best = pd.Series(offset_dry_best, index=offset_dry.index, name=offset_dry.name)
-
-#################  Last step for reconstruction ZWD : adding local offset back to InSAR data based on GPS/HRRR ######
 wet_delay_diff_insar_revised = np.zeros(wet_delay_diff_insar.wet_delay.shape)
 
 for i,t in enumerate(date_list):
-    wet_delay_diff_insar_revised[i,:,:] = wet_delay_diff_insar.wet_delay.sel(time=t) + (offset_best-offset_dry_best).loc[t]
+    wet_delay_diff_insar_revised[i,:,:] = wet_delay_diff_insar.wet_delay.sel(time=t) + (offset-offset_dry).loc[t]
 wet_delay_diff_insar_revised = xr.DataArray(wet_delay_diff_insar_revised,dims=('time','latitude','longitude')
                             ,coords=(date_list,lat_sar,lon_sar),name='wet_delay') 
 wet_delay_diff_insar_revised = wet_delay_diff_insar_revised.to_dataset(name='wet_delay')
