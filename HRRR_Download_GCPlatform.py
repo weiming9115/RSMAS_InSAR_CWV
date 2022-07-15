@@ -23,7 +23,7 @@ import h5py
 
 warnings.filterwarnings('ignore')
 case_id = sys.argv[1]
-os.chdir('/data2/willytsai/InSAR_HRRR/'+case_id+'/mintpy/pic/')
+os.chdir('/data2/willytsai/InSAR_HRRR/data_Falk/'+case_id+'/mintpy/pic/')
 file = np.loadtxt('rms_timeseriesResidual_ramp.txt',skiprows=4)
 date_acqui = []
 for t in range(file.shape[0]):
@@ -35,9 +35,9 @@ os.system('mkdir -p sfc')
 os.chdir('/data2/willytsai/InSAR_HRRR/auto_framework/'+case_id+'/HRRR_data/sfc/')
 
 ## get close UTC of Sentinel-1
-s1_file = glob('/data2/willytsai/InSAR_HRRR/'+case_id+'/mintpy/*.he5')[0]
+s1_file = glob('/data2/willytsai/InSAR_HRRR/data_Falk/'+case_id+'/mintpy/*.he5')[0]
 s1_he5 = h5py.File(s1_file,'r')
-print('satellite time: ',(s1_he5.attrs['startUTC'])
+print('satellite time: ',s1_he5.attrs['startUTC'])
 hh = s1_he5.attrs['startUTC'][11:13] # hr 
 mm = s1_he5.attrs['startUTC'][14:16] # mm
 if int(mm) > 30:

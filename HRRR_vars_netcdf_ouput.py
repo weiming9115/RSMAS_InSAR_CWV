@@ -28,7 +28,7 @@ warnings.filterwarnings('ignore')
 
 CASE_ID = sys.argv[1]
 # get geolocation from InSAR
-geo_file = '/data2/willytsai/InSAR_HRRR/'+CASE_ID+'/mintpy/inputs/geometryRadar.h5'
+geo_file = '/data2/willytsai/InSAR_HRRR/data_Falk/'+CASE_ID+'/mintpy/inputs/geometryRadar.h5'
 geo = h5py.File(geo_file,'r')
 # for key in geo.keys():
 #     print(key) #Names of the groups in HDF5 file.
@@ -49,7 +49,7 @@ tmp = xr.open_dataset(files[-1],engine='cfgrib',
 pwat_tmp = tmp.pwat.sel(latitude=slice(axis_bound[0],axis_bound[1]),longitude=slice(axis_bound[2]+360,axis_bound[3]+360))
 
 # giving the acquisition info, that is, time
-os.chdir('/data2/willytsai/InSAR_HRRR/'+CASE_ID+'/mintpy/pic/')
+os.chdir('/data2/willytsai/InSAR_HRRR/data_Falk/'+CASE_ID+'/mintpy/pic/')
 file = np.loadtxt('rms_timeseriesResidual_ramp.txt',skiprows=4)
 date_acqui = []
 for t in range(file.shape[0]):
@@ -94,7 +94,7 @@ os.system('rm -f HRRR_regrid*') # remove HRRR_regrid3km_xxx.nc
 
 # merge HRRR dataset 
 ## get close UTC of Sentinel-1
-s1_file = glob('/data2/willytsai/InSAR_HRRR/'+CASE_ID+'/mintpy/*.he5')[0]
+s1_file = glob('/data2/willytsai/InSAR_HRRR/data_Falk/'+CASE_ID+'/mintpy/*.he5')[0]
 s1_he5 = h5py.File(s1_file,'r')
 print('satellite time: ',(s1_he5.attrs['startUTC']))
 hh = s1_he5.attrs['startUTC'][11:13] # hr

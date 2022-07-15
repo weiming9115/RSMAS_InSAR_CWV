@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # CASE ID
-CASE_ID=SouthWesternNAMChunk32SenAT20
+CASE_ID=SouthWesternNAMChunk32SenAT137
 
 #1.Create directories
 echo "CASE_ID: " $CASE_ID
